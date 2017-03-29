@@ -39,6 +39,9 @@ let
          )
        )
      ) ./.;
+    enableSharedExecutables = profiling;
+    enableExecutableProfiling = profiling;
+    doHaddock = false;
   });
   bar = myHaskellPackages.bar;
 in {
