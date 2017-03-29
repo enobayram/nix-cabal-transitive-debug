@@ -42,6 +42,7 @@ let
     enableSharedExecutables = profiling;
     enableExecutableProfiling = profiling;
     doHaddock = false;
+    postFixup = "rm -rf $out/nix-support";
   });
   bar = myHaskellPackages.bar;
 in {
