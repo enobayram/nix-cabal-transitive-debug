@@ -13,11 +13,32 @@ let
     };
   fooHs' = myHaskellPackages.callPackage ./hs.nix {};
   fooHs = overrideCabal fooHs' (drv: {
+    preCheck = ''
+      export SHAREDDIR=${shared}
+    '';
     configureFlags = [ "--ghc-option=-with-rtsopts=-T" "--ghc-option=-j12" ]
                     ++ (if profiling then [ "--ghc-option=-rtsopts"
                                             "--ghc-option=-auto-all"
                                             "--ghc-option=-caf-all" ]
                                      else []);
+    src = builtins.filterSource (path: type:
+       ( ( type == "directory"
+        && baseNameOf path != "doc"
+        && baseNameOf path != "dist"
+        && baseNameOf path != "scripts"
+        && baseNameOf path != "shared"
+         )
+      || ( type == "regular"
+        && !pkgs.lib.hasSuffix ".nix" path
+        && !pkgs.lib.hasSuffix ".md"  path
+        && !pkgs.lib.hasSuffix ".o"   path
+        && !pkgs.lib.hasSuffix ".hi"  path
+        && !pkgs.lib.hasSuffix ".swp" path
+        && !pkgs.lib.hasSuffix ".swp" path
+        && !pkgs.lib.hasSuffix ".swo" path
+         )
+       )
+     ) ./.;
   });
   bar = myHaskellPackages.bar;
 in {
