@@ -2,16 +2,18 @@
 let
   shared = "shared";
   overrideCabal = pkgs.haskell.lib.overrideCabal;
+  generateHsNix = name: folder:
+    pkgs.runCommand name {buildInputs = [pkgs.cabal2nix];} "${pkgs.cabal2nix}/bin/cabal2nix ${folder} >$out";
   myHaskellPackages = pkgs.haskellPackages.override {
       overrides = self: super: with pkgs.haskell.lib; {
         mkDerivation = args: super.mkDerivation (args // {
           enableLibraryProfiling = profiling;
         });
         foo = fooHs;
-        bar = self.callPackage bar/hs.nix {};
+        bar = self.callPackage (generateHsNix "bar" ./bar) {};
       };
     };
-  fooHs' = myHaskellPackages.callPackage ./hs.nix {};
+  fooHs' = myHaskellPackages.callPackage (generateHsNix "foo" ./.) {};
   fooHs = overrideCabal fooHs' (drv: {
     preCheck = ''
       export SHAREDDIR=${shared}
